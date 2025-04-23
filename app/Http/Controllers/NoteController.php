@@ -11,8 +11,9 @@ class NoteController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        return 'index';
+    {   
+        $note = Note::query()->orderBy('created_at', 'desc')->paginate();
+        return view('note.index', ['notes' => $note]);
     }
 
     /**
@@ -20,7 +21,7 @@ class NoteController extends Controller
      */
     public function create()
     {
-        return 'create';
+        return view('note.create');
     }
 
     /**
@@ -28,7 +29,14 @@ class NoteController extends Controller
      */
     public function store(Request $request)
     {
-        return 'store';
+        $data = $request->validate([
+            'note' => ['required', 'string']
+        ]);
+
+        $data['user_id'] = 1;
+        $note = Note::create($data);
+
+        return to_route('note.show', $note)->with('message', 'New note created');
     }
 
     /**
@@ -36,7 +44,7 @@ class NoteController extends Controller
      */
     public function show(Note $note)
     {
-        return 'show';
+        return view('note.show', ['note' => $note]);
     }
 
     /**
@@ -44,7 +52,7 @@ class NoteController extends Controller
      */
     public function edit(Note $note)
     {
-        return 'edit';
+        return view('note.edit', ['note' => $note]);
     }
 
     /**
@@ -52,7 +60,13 @@ class NoteController extends Controller
      */
     public function update(Request $request, Note $note)
     {
-        return 'update';
+        $data = $request->validate([
+            'note' => ['required', 'string']
+        ]);
+
+        $note->update($data);
+
+        return to_route('note.show', $note)->with('message', 'Note is updated');
     }
 
     /**
@@ -60,6 +74,8 @@ class NoteController extends Controller
      */
     public function destroy(Note $note)
     {
-        return 'destroy';
+        $note->delete();
+        return to_route('note.index')->with('message', 'Note is deleted');
+
     }
 }
